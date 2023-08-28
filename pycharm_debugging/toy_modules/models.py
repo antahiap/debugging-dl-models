@@ -9,7 +9,7 @@ class RegressorNet(tf.keras.Model):
 
         self.optimizer = optimizer
         self.dense_1_1 = tf.keras.layers.Dense(
-            64, activation='tanh',
+            64, activation='relu',
             kernel_initializer=tf.keras.initializers.GlorotUniform(),
             name='dense_1_1'
         )
@@ -25,7 +25,7 @@ class RegressorNet(tf.keras.Model):
             name='dense_2'
         )
         self.out = tf.keras.layers.Dense(
-            1, activation='relu',
+            1, #activation='relu',
             kernel_initializer=tf.keras.initializers.GlorotUniform(),
             name='dense_out'
         )
@@ -36,7 +36,7 @@ class RegressorNet(tf.keras.Model):
         x2 = x_input[:, x_input.shape[1] // 2:]
 
         h1 = self.dense_1_1(x1)
-        h2 = self.dense_1_2(x1)
+        h2 = self.dense_1_2(x2)
         h = self.concat([h1, h2])
         h = self.dense_2(h)
         out = self.out(h)
@@ -54,7 +54,7 @@ class RegressorNet(tf.keras.Model):
     def grad_step(self, x, y_true):
         with tf.GradientTape() as tape:
             loss = self.get_loss(x, y_true)
-        gradients = tape.gradient(loss, self.trainable_variables[1:2])
+        gradients = tape.gradient(loss, self.trainable_variables) #[1:2])
         gradients = tf.clip_by_global_norm(gradients, 1.0)[0]
-        self.optimizer.apply_gradients(zip(gradients, self.trainable_variables[1:2]))
+        self.optimizer.apply_gradients(zip(gradients, self.trainable_variables)) #[1:2]))
         return loss, gradients
